@@ -22,11 +22,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # Node.js setup and testing
+      # Set up Node.js environment
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+
+      # Install dependencies and run tests
       - run: npm install
       - run: npm test
 
@@ -36,19 +38,32 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # Docker image build and push
-      - name: Build Docker image and push to Docker Hub
-        id: build
+      # Set up Docker
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Login to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      # Build Docker image and push to Docker Hub
+      - name: Build and push Docker image
+        id: docker-build-push
         uses: cloudposse/github-action-docker-build-push@main
         with:
           registry: registry.hub.docker.com
-          organization: "${{ github.event.repository.owner.login }}"
+          organization: "${{ github.repository_owner }}"
           repository: "${{ github.event.repository.name }}"
           login: "${{ secrets.DOCKERHUB_USERNAME }}"
           password: "${{ secrets.DOCKERHUB_PASSWORD }}"
           platforms: linux/amd64,linux/arm64
+          tags: ${{ github.sha }}  # Use commit SHA as the tag
 
     outputs:
-      image: ${{ steps.build.outputs.image }}
-      tag: ${{ steps.build.outputs.tag }}
+      image: ${{ steps.docker-build-push.outputs.image }}
+      tag: ${{ steps.docker-build-push.outputs.tag }}
+
 
