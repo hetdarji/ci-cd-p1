@@ -1,0 +1,11 @@
+{
+  "name": "NodeJS",
+  "version": "1.0.0",
+  "description": " this is a node app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"No tests yet\""
+  },
+  "author": "Het Darji",
+  "license": "ISC"
+}
