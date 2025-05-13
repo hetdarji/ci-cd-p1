@@ -1,14 +1,56 @@
+#on:
+ # push:
+  #  branches: [ main ]
+#jobs:
+  #build:
+   # runs-on: ubuntu-latest
+    #steps:
+     # - uses: actions/checkout@v3
+      #- name: Set up Node.js
+       # uses: actions/setup-node@v3
+        #with:
+         # node-version: '18'
+      #- run: npm install
+      #- run: npm test 
+      name: CI/CD Pipeline
+
 on:
   push:
     branches: [ main ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      # Node.js setup and testing
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
       - run: npm install
       - run: npm test
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: build  # Ensures this job only runs after the 'build' job
+    steps:
+      - uses: actions/checkout@v3
+
+      # Docker image build and push
+      - name: Build Docker image and push to Docker Hub
+        id: build
+        uses: cloudposse/github-action-docker-build-push@main
+        with:
+          registry: registry.hub.docker.com
+          organization: "${{ github.event.repository.owner.login }}"
+          repository: "${{ github.event.repository.name }}"
+          login: "${{ secrets.DOCKERHUB_USERNAME }}"
+          password: "${{ secrets.DOCKERHUB_PASSWORD }}"
+          platforms: linux/amd64,linux/arm64
+
+    outputs:
+      image: ${{ steps.build.outputs.image }}
+      tag: ${{ steps.build.outputs.tag }}
+
