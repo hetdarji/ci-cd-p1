@@ -63,4 +63,3 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.REPO_NAME_LOWER }}:${{ github.sha }}
-          platforms: linux/amd64,linux/arm64
